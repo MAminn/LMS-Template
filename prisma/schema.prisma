@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(cuid())
+  email    String   @unique
+  name     String?
+  password String?
+  role     UserRole @default(STUDENT)
+  createdAt DateTime @default(now())
+
+  accounts         Account[]
+  sessions         Session[]
+  enrollments      Enrollment[]
+  instructedCourses Course[] @relation("CourseInstructor")
+  brandingSettings BrandingSetting[]
+  banners          HomepageBanner[]
+  lessonProgress   LessonProgress[]
+  payments         Payment[]
+  subscriptions    Subscription[]
+  transactions     Transaction[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Course {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  thumbnail   String?
+  price       Float?
+  isPublished Boolean @default(false)
+  instructorId String
+  instructor   User    @relation("CourseInstructor", fields: [instructorId], references: [id])
+  enrollments  Enrollment[]
+  modules      Module[]
+  payments     Payment[]
+  createdAt    DateTime @default(now())
+
+  @@map("courses")
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+  createdAt   DateTime @default(now())
+
+  @@map("modules")
+}
+
+model Lesson {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  content     String?
+  videoUrl    String?
+  duration    Int?        // duration in minutes
+  order       Int
+  moduleId    String
+  module      Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+  createdAt   DateTime    @default(now())
+
+  @@map("lessons")
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([studentId, lessonId])
+  @@map("lesson_progress")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress  Float    @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
+  @@map("enrollments")
+}
+
+model BrandingSetting {
+  id           String  @id @default(cuid())
+  logoUrl      String?
+  primaryColor String  @default("#3b82f6")
+  siteName     String?
+  isActive     Boolean @default(true)
+  createdBy    String?
+  creator      User?   @relation(fields: [createdBy], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@map("branding_settings")
+}
+
+model HomepageBanner {
+  id       String  @id @default(cuid())
+  title    String
+  subtitle String?
+  imageUrl String?
+  isVisible Boolean @default(true)
+  order    Int     @default(0)
+  createdBy String?
+  creator   User?   @relation(fields: [createdBy], references: [id])
+
+  @@map("homepage_banners")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  stripeSessionId String?       @unique
+  stripePaymentId String?       @unique
+  amount          Float         // Amount in dollars
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  paymentMethod   String?       // stripe, paypal, etc.
+  
+  // Relations
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model Subscription {
+  id                 String           @id @default(cuid())
+  stripeSubscriptionId String?        @unique
+  status             SubscriptionStatus @default(ACTIVE)
+  plan               SubscriptionPlan
+  
+  // Pricing
+  amount             Float            // Monthly/yearly amount
+  currency           String           @default("usd")
+  interval           String           // month, year
+  
+  // Dates
+  startDate          DateTime
+  endDate            DateTime?
+  canceledAt         DateTime?
+  
+  // Relations
+  userId             String
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  metadata           Json?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id            String            @id @default(cuid())
+  type          TransactionType
+  amount        Float
+  currency      String            @default("usd")
+  status        TransactionStatus @default(PENDING)
+  description   String?
+  
+  // Relations
+  userId        String?
+  user          User?             @relation(fields: [userId], references: [id])
+  paymentId     String?
+  payment       Payment?          @relation(fields: [paymentId], references: [id])
+  
+  // Metadata
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("transactions")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum TransactionType {
+  COURSE_PURCHASE
+  SUBSCRIPTION_PAYMENT
+  REFUND
+  COMMISSION
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELED
+}
