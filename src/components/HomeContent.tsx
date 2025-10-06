@@ -22,8 +22,8 @@ export function HomeContent({ content, features }: HomeContentProps) {
   const brandingClasses = useBrandingClasses();
 
   // Debug log to check if heroBackground is available
-  console.log('Theme assets:', theme.assets);
-  console.log('Hero background URL:', theme.assets.heroBackground);
+  console.log("Theme assets:", theme.assets);
+  console.log("Hero background URL:", theme.assets.heroBackground);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
