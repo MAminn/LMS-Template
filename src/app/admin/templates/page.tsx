@@ -3,6 +3,15 @@ import Link from "next/link";
 
 const templateCards = [
   {
+    title: "Landing Page Editor",
+    description:
+      "Complete control over homepage content, hero section, features, and messaging",
+    icon: Layout,
+    href: "/admin/templates/landing",
+    color: "bg-green-500",
+    stats: "Full Control",
+  },
+  {
     title: "Branding Settings",
     description: "Customize colors, logos, fonts, and overall brand identity",
     icon: Palette,
@@ -15,7 +24,7 @@ const templateCards = [
     description: "Create and customize pages with drag-and-drop editor",
     icon: Layout,
     href: "/admin/templates/pages",
-    color: "bg-green-500",
+    color: "bg-purple-500",
     stats: "12 Pages",
   },
   {
@@ -24,7 +33,7 @@ const templateCards = [
       "Design automated emails for courses, notifications, and marketing",
     icon: Mail,
     href: "/admin/templates/emails",
-    color: "bg-purple-500",
+    color: "bg-orange-500",
     stats: "8 Templates",
   },
   {
@@ -33,7 +42,7 @@ const templateCards = [
       "Manage homepage banners, announcements, and promotional content",
     icon: ImageIcon,
     href: "/admin/templates/banners",
-    color: "bg-orange-500",
+    color: "bg-red-500",
     stats: "3 Active",
   },
 ];

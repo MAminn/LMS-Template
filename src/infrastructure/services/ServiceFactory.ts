@@ -9,6 +9,7 @@ import { CourseService } from "@/domains/courses/service";
 import { UserService } from "@/domains/users/service";
 import { ContentService } from "@/domains/content/service";
 import { ProgressService } from "@/domains/progress/service";
+import { BrandingService } from "@/domains/branding/service";
 
 import { PrismaCourseRepository } from "@/infrastructure/repositories/PrismaCourseRepository";
 import { PrismaUserRepository } from "@/infrastructure/repositories/PrismaUserRepository";
@@ -17,6 +18,7 @@ import {
   PrismaLessonRepository,
 } from "@/infrastructure/repositories/PrismaContentRepository";
 import { PrismaProgressRepository } from "@/infrastructure/repositories/PrismaProgressRepository";
+import { PrismaBrandingRepository } from "@/infrastructure/repositories/PrismaBrandingRepository";
 
 /**
  * Create service instances with injected dependencies
@@ -28,6 +30,7 @@ export const createServices = () => {
   const moduleRepository = new PrismaModuleRepository();
   const lessonRepository = new PrismaLessonRepository();
   const progressRepository = new PrismaProgressRepository();
+  const brandingRepository = new PrismaBrandingRepository();
 
   // Service instances with injected repositories
   const courseService = new CourseService(courseRepository, userRepository);
@@ -41,6 +44,10 @@ export const createServices = () => {
     progressRepository,
     userRepository
   );
+  const brandingService = new BrandingService(
+    brandingRepository,
+    userRepository
+  );
 
   return {
     // Repositories
@@ -49,12 +56,14 @@ export const createServices = () => {
     moduleRepository,
     lessonRepository,
     progressRepository,
+    brandingRepository,
 
     // Services
     courseService,
     userService,
     contentService,
     progressService,
+    brandingService,
   };
 };
 

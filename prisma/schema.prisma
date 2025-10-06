@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -8,31 +9,25 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(cuid())
-  email    String   @unique
-  name     String?
-  password String?
-  role     UserRole @default(STUDENT)
-  createdAt DateTime @default(now())
-
-  accounts         Account[]
-  sessions         Session[]
-  enrollments      Enrollment[]
-  instructedCourses Course[] @relation("CourseInstructor")
-  brandingSettings BrandingSetting[]
-  banners          HomepageBanner[]
-  lessonProgress   LessonProgress[]
-  payments         Payment[]
-  subscriptions    Subscription[]
-  transactions     Transaction[]
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  name               String?
+  password           String?
+  role               UserRole             @default(STUDENT)
+  createdAt          DateTime             @default(now())
+  accounts           Account[]
+  brandingSettings   BrandingSetting[]
+  instructedCourses  Course[]             @relation("CourseInstructor")
+  enrollments        Enrollment[]
+  banners            HomepageBanner[]
+  landingPageContent LandingPageContent[]
+  lessonProgress     LessonProgress[]
+  payments           Payment[]
+  sessions           Session[]
+  subscriptions      Subscription[]
+  transactions       Transaction[]
 
   @@map("users")
-}
-
-enum UserRole {
-  STUDENT
-  INSTRUCTOR
-  ADMIN
 }
 
 model Account {
@@ -74,18 +69,18 @@ model VerificationToken {
 }
 
 model Course {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-  thumbnail   String?
-  price       Float?
-  isPublished Boolean @default(false)
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  thumbnail    String?
+  price        Float?
+  isPublished  Boolean      @default(false)
   instructorId String
-  instructor   User    @relation("CourseInstructor", fields: [instructorId], references: [id])
+  createdAt    DateTime     @default(now())
+  instructor   User         @relation("CourseInstructor", fields: [instructorId], references: [id])
   enrollments  Enrollment[]
   modules      Module[]
   payments     Payment[]
-  createdAt    DateTime @default(now())
 
   @@map("courses")
 }
@@ -96,38 +91,38 @@ model Module {
   description String?
   order       Int
   courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons     Lesson[]
   createdAt   DateTime @default(now())
+  lessons     Lesson[]
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("modules")
 }
 
 model Lesson {
-  id          String      @id @default(cuid())
+  id          String           @id @default(cuid())
   title       String
   description String?
   content     String?
   videoUrl    String?
-  duration    Int?        // duration in minutes
+  duration    Int?
   order       Int
   moduleId    String
-  module      Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
   progress    LessonProgress[]
-  createdAt   DateTime    @default(now())
+  module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@map("lessons")
 }
 
 model LessonProgress {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   studentId   String
-  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
   lessonId    String
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  completed   Boolean  @default(false)
+  completed   Boolean   @default(false)
   completedAt DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, lessonId])
   @@map("lesson_progress")
@@ -136,36 +131,41 @@ model LessonProgress {
 model Enrollment {
   id        String   @id @default(cuid())
   studentId String
-  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
   courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress  Float    @default(0)
   createdAt DateTime @default(now())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, courseId])
   @@map("enrollments")
 }
 
 model BrandingSetting {
-  id           String  @id @default(cuid())
-  logoUrl      String?
-  primaryColor String  @default("#3b82f6")
-  siteName     String?
-  isActive     Boolean @default(true)
-  createdBy    String?
-  creator      User?   @relation(fields: [createdBy], references: [id])
-  createdAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  logoUrl         String?
+  primaryColor    String   @default("#3b82f6")
+  secondaryColor  String   @default("#1e40af")
+  siteName        String?  @default("The Academy")
+  siteDescription String?  @default("Learn anything, anywhere, anytime")
+  fontFamily      String   @default("Inter")
+  faviconUrl      String?
+  isActive        Boolean  @default(true)
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+  creator         User?    @relation(fields: [createdBy], references: [id])
 
   @@map("branding_settings")
 }
 
 model HomepageBanner {
-  id       String  @id @default(cuid())
-  title    String
-  subtitle String?
-  imageUrl String?
+  id        String  @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String?
   isVisible Boolean @default(true)
-  order    Int     @default(0)
+  order     Int     @default(0)
   createdBy String?
   creator   User?   @relation(fields: [createdBy], references: [id])
 
@@ -176,74 +176,105 @@ model Payment {
   id              String        @id @default(cuid())
   stripeSessionId String?       @unique
   stripePaymentId String?       @unique
-  amount          Float         // Amount in dollars
+  amount          Float
   currency        String        @default("usd")
   status          PaymentStatus @default(PENDING)
-  paymentMethod   String?       // stripe, paypal, etc.
-  
-  // Relations
-  userId    String
-  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId  String
-  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  
-  // Metadata
-  metadata  Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  paymentMethod   String?
+  userId          String
+  courseId        String
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course          Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
 
   @@map("payments")
 }
 
 model Subscription {
-  id                 String           @id @default(cuid())
-  stripeSubscriptionId String?        @unique
-  status             SubscriptionStatus @default(ACTIVE)
-  plan               SubscriptionPlan
-  
-  // Pricing
-  amount             Float            // Monthly/yearly amount
-  currency           String           @default("usd")
-  interval           String           // month, year
-  
-  // Dates
-  startDate          DateTime
-  endDate            DateTime?
-  canceledAt         DateTime?
-  
-  // Relations
-  userId             String
-  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Metadata
-  metadata           Json?
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  id                   String             @id @default(cuid())
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus @default(ACTIVE)
+  plan                 SubscriptionPlan
+  amount               Float
+  currency             String             @default("usd")
+  interval             String
+  startDate            DateTime
+  endDate              DateTime?
+  canceledAt           DateTime?
+  userId               String
+  metadata             Json?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
 }
 
 model Transaction {
-  id            String            @id @default(cuid())
-  type          TransactionType
-  amount        Float
-  currency      String            @default("usd")
-  status        TransactionStatus @default(PENDING)
-  description   String?
-  
-  // Relations
-  userId        String?
-  user          User?             @relation(fields: [userId], references: [id])
-  paymentId     String?
-  payment       Payment?          @relation(fields: [paymentId], references: [id])
-  
-  // Metadata
-  metadata      Json?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id          String            @id @default(cuid())
+  type        TransactionType
+  amount      Float
+  currency    String            @default("usd")
+  status      TransactionStatus @default(PENDING)
+  description String?
+  userId      String?
+  paymentId   String?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User?             @relation(fields: [userId], references: [id])
+  payment     Payment?          @relation(fields: [paymentId], references: [id])
 
   @@map("transactions")
+}
+
+model LandingPageContent {
+  id                String   @id @default(cuid())
+  heroTitle         String   @default("Build Your Learning Empire")
+  heroSubtitle      String   @default("Complete Learning Management System with no-code customization, advanced analytics, and seamless content delivery.")
+  heroBadgeText     String   @default("🚀 Next-Generation Learning Platform")
+  heroCtaPrimary    String   @default("Explore Courses")
+  heroCtaSecondary  String   @default("Start Learning")
+  studentsCount     String   @default("1000+")
+  coursesCount      String   @default("50+")
+  instructorsCount  String   @default("25+")
+  completionRate    String   @default("95%")
+  featuresTitle     String   @default("Everything You Need to Succeed")
+  featuresSubtitle  String   @default("From course creation to student management, we provide all the tools you need to build and scale your educational platform.")
+  demoTitle         String   @default("Try The Academy Today")
+  demoSubtitle      String   @default("Experience the full power of our learning management system with these demo accounts.")
+  footerDescription String   @default("Empowering educators and learners with cutting-edge technology. Build, customize, and scale your learning platform with ease.")
+  isActive          Boolean  @default(false)
+  createdBy         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  creator           User     @relation(fields: [createdBy], references: [id])
+
+  @@map("landing_page_content")
+}
+
+model LandingPageFeature {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  color       String   @default("blue")
+  features    String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  contentId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("landing_page_features")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
 }
 
 enum PaymentStatus {

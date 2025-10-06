@@ -12,6 +12,16 @@ export {
   PrismaLessonRepository,
 } from "./PrismaContentRepository";
 export { PrismaProgressRepository } from "./PrismaProgressRepository";
+export { PrismaBrandingRepository } from "./PrismaBrandingRepository";
+
+import { PrismaCourseRepository } from "./PrismaCourseRepository";
+import { PrismaUserRepository } from "./PrismaUserRepository";
+import {
+  PrismaModuleRepository,
+  PrismaLessonRepository,
+} from "./PrismaContentRepository";
+import { PrismaProgressRepository } from "./PrismaProgressRepository";
+import { PrismaBrandingRepository } from "./PrismaBrandingRepository";
 
 /**
  * Repository factory functions for dependency injection
@@ -22,6 +32,7 @@ export const createRepositories = () => ({
   moduleRepository: new PrismaModuleRepository(),
   lessonRepository: new PrismaLessonRepository(),
   progressRepository: new PrismaProgressRepository(),
+  brandingRepository: new PrismaBrandingRepository(),
 });
 
 /**

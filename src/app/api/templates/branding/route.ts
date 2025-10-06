@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { getServices } from "@/infrastructure/services/ServiceFactory";
 
 // GET /api/templates/branding - Get current branding settings
 export async function GET() {
   try {
-    const settings = await prisma.brandingSetting.findFirst({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-    });
+    const { brandingService } = getServices();
+    const branding = await brandingService.getActiveBranding();
 
     return NextResponse.json({
       success: true,
-      data: settings || {
-        primaryColor: "#3b82f6",
-        siteName: "The Academy",
-      },
+      data: branding,
     });
   } catch (error) {
     console.error("Error fetching branding settings:", error);
@@ -40,33 +35,42 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
+    const { brandingService } = getServices();
 
-    // Deactivate current active settings
-    await prisma.brandingSetting.updateMany({
-      where: { isActive: true },
-      data: { isActive: false },
-    });
-
-    // Create new settings
-    const newSettings = await prisma.brandingSetting.create({
-      data: {
+    const newBranding = await brandingService.createBranding(
+      {
         logoUrl: data.logoUrl,
         primaryColor: data.primaryColor || "#3b82f6",
-        siteName: data.siteName,
-        isActive: true,
+        secondaryColor: data.secondaryColor || "#1e40af",
+        siteName: data.siteName || "The Academy",
+        siteDescription:
+          data.siteDescription || "Learn anything, anywhere, anytime",
+        fontFamily: data.fontFamily || "Inter",
+        faviconUrl: data.faviconUrl,
         createdBy: session.user.id,
       },
-    });
+      session.user.id
+    );
 
     return NextResponse.json({
       success: true,
-      data: newSettings,
+      data: newBranding,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error saving branding settings:", error);
+
+    const statusCode =
+      error instanceof Error && "statusCode" in error
+        ? (error as Error & { statusCode: number }).statusCode
+        : 500;
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to save branding settings";
+
     return NextResponse.json(
-      { success: false, error: "Failed to save branding settings" },
-      { status: 500 }
+      { success: false, error: message },
+      { status: statusCode }
     );
   }
 }
