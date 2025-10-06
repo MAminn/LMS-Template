@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
     const newBranding = await brandingService.createBranding(
       {
         logoUrl: data.logoUrl,
+        logoText: data.logoText || "The Academy",
+        logoType: data.logoType || "text",
         primaryColor: data.primaryColor || "#3b82f6",
         secondaryColor: data.secondaryColor || "#1e40af",
         siteName: data.siteName || "The Academy",
@@ -47,6 +49,7 @@ export async function POST(request: NextRequest) {
           data.siteDescription || "Learn anything, anywhere, anytime",
         fontFamily: data.fontFamily || "Inter",
         faviconUrl: data.faviconUrl,
+        heroBackgroundUrl: data.heroBackgroundUrl,
         createdBy: session.user.id,
       },
       session.user.id

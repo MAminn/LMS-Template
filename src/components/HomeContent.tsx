@@ -21,6 +21,10 @@ export function HomeContent({ content, features }: HomeContentProps) {
   const brandingStyles = useBrandingStyles();
   const brandingClasses = useBrandingClasses();
 
+  // Debug log to check if heroBackground is available
+  console.log('Theme assets:', theme.assets);
+  console.log('Hero background URL:', theme.assets.heroBackground);
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
       {/* Navigation Header */}
@@ -69,22 +73,25 @@ export function HomeContent({ content, features }: HomeContentProps) {
       </nav>
 
       {/* Hero Section */}
-      <section className='relative py-20 overflow-hidden'>
+      <section
+        className='relative h-[80vh] py-20 overflow-hidden flex justify-center align-center'
+        style={{
+          ...(theme.assets.heroBackground && {
+            backgroundImage: `url(${theme.assets.heroBackground})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }),
+        }}>
         <div
           className='absolute inset-0'
           style={{
-            background: `linear-gradient(135deg, ${theme.colors.primary}10, ${theme.colors.secondary}10)`,
+            background: theme.assets.heroBackground
+              ? `linear-gradient(135deg, ${theme.colors.primary}40, ${theme.colors.secondary}40)`
+              : `linear-gradient(135deg, ${theme.colors.primary}10, ${theme.colors.secondary}10)`,
           }}></div>
-        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center h-full'>
           <div className='text-center'>
-            <div
-              className='inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-8'
-              style={{
-                backgroundColor: `${theme.colors.primary}20`,
-                color: theme.colors.primary,
-              }}>
-              {content.heroBadgeText}
-            </div>
             <h1 className='text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight'>
               {content.heroTitle}
             </h1>

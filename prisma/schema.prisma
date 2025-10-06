@@ -142,19 +142,22 @@ model Enrollment {
 }
 
 model BrandingSetting {
-  id              String   @id @default(cuid())
-  logoUrl         String?
-  primaryColor    String   @default("#3b82f6")
-  secondaryColor  String   @default("#1e40af")
-  siteName        String?  @default("The Academy")
-  siteDescription String?  @default("Learn anything, anywhere, anytime")
-  fontFamily      String   @default("Inter")
-  faviconUrl      String?
-  isActive        Boolean  @default(true)
-  createdBy       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
-  creator         User?    @relation(fields: [createdBy], references: [id])
+  id                 String    @id @default(cuid())
+  logoUrl            String?
+  logoText           String?   @default("The Academy")
+  logoType           LogoType  @default(text)
+  primaryColor       String    @default("#3b82f6")
+  secondaryColor     String    @default("#1e40af")
+  siteName           String?   @default("The Academy")
+  siteDescription    String?   @default("Learn anything, anywhere, anytime")
+  fontFamily         String    @default("Inter")
+  faviconUrl         String?
+  heroBackgroundUrl  String?
+  isActive           Boolean   @default(true)
+  createdBy          String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now()) @updatedAt
+  creator            User?     @relation(fields: [createdBy], references: [id])
 
   @@map("branding_settings")
 }
@@ -269,6 +272,11 @@ model LandingPageFeature {
   updatedAt   DateTime @updatedAt
 
   @@map("landing_page_features")
+}
+
+enum LogoType {
+  upload
+  text
 }
 
 enum UserRole {

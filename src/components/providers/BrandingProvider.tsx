@@ -135,6 +135,7 @@ export const BrandingProvider: React.FC<BrandingProviderProps> = ({
           assets: {
             logo: branding.logoUrl,
             favicon: branding.faviconUrl,
+            heroBackground: branding.heroBackgroundUrl,
           },
           identity: {
             siteName: branding.siteName || defaultTheme.identity.siteName,

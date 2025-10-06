@@ -68,13 +68,16 @@ export class PrismaBrandingRepository implements BrandingRepository {
   async create(data: CreateBrandingData): Promise<BrandingSetting> {
     const brandingData = await prisma.brandingSetting.create({
       data: {
-        logoUrl: data.logoUrl,
+        logoUrl: data.logoUrl ?? null,
+        logoText: data.logoText ?? null,
+        logoType: data.logoType,
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
         siteName: data.siteName,
         siteDescription: data.siteDescription,
         fontFamily: data.fontFamily,
-        faviconUrl: data.faviconUrl,
+        faviconUrl: data.faviconUrl ?? null,
+        heroBackgroundUrl: data.heroBackgroundUrl ?? null,
         isActive: true,
         createdBy: data.createdBy,
       },
@@ -90,13 +93,16 @@ export class PrismaBrandingRepository implements BrandingRepository {
     const brandingData = await prisma.brandingSetting.update({
       where: { id },
       data: {
-        logoUrl: data.logoUrl,
+        logoUrl: data.logoUrl ?? null,
+        logoText: data.logoText ?? null,
+        logoType: data.logoType,
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
         siteName: data.siteName,
         siteDescription: data.siteDescription,
         fontFamily: data.fontFamily,
-        faviconUrl: data.faviconUrl,
+        faviconUrl: data.faviconUrl ?? null,
+        heroBackgroundUrl: data.heroBackgroundUrl ?? null,
       },
     });
 
@@ -147,6 +153,8 @@ export class PrismaBrandingRepository implements BrandingRepository {
     return {
       id: data.id as string,
       logoUrl: (data.logoUrl as string) || undefined,
+      logoText: (data.logoText as string) || "The Academy",
+      logoType: (data.logoType as "upload" | "text") || "text",
       primaryColor: (data.primaryColor as string) || "#3b82f6",
       secondaryColor: (data.secondaryColor as string) || "#1e40af",
       siteName: (data.siteName as string) || "The Academy",
@@ -154,10 +162,11 @@ export class PrismaBrandingRepository implements BrandingRepository {
         (data.siteDescription as string) || "Learn anything, anywhere, anytime",
       fontFamily: (data.fontFamily as string) || "Inter",
       faviconUrl: (data.faviconUrl as string) || undefined,
+      heroBackgroundUrl: (data.heroBackgroundUrl as string) || undefined,
       isActive: (data.isActive as boolean) ?? true,
       createdBy: (data.createdBy as string) || undefined,
       createdAt: data.createdAt as Date,
       updatedAt: (data.updatedAt as Date) || (data.createdAt as Date),
-    };
+    } as BrandingSetting;
   }
 }

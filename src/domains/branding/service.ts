@@ -53,8 +53,11 @@ export class BrandingService {
         primary: branding.fontFamily,
       },
       assets: {
-        logo: branding.logoUrl || undefined,
-        favicon: branding.faviconUrl || undefined,
+        ...(branding.logoUrl && { logo: branding.logoUrl }),
+        ...(branding.faviconUrl && { favicon: branding.faviconUrl }),
+        ...(branding.heroBackgroundUrl && {
+          heroBackground: branding.heroBackgroundUrl,
+        }),
       },
       identity: {
         siteName: branding.siteName,
@@ -187,6 +190,8 @@ export class BrandingService {
   private getDefaultBranding(): BrandingSetting {
     return {
       id: "default",
+      logoText: "The Academy",
+      logoType: "text",
       primaryColor: "#3b82f6",
       secondaryColor: "#1e40af",
       siteName: "The Academy",

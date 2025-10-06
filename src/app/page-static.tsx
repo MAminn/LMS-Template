@@ -35,9 +35,6 @@ export default function Home() {
       <section className='py-20 px-4 sm:px-6 lg:px-8'>
         <div className='max-w-7xl mx-auto text-center'>
           <div className='mb-8'>
-            <div className='inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-blue-800 text-sm font-medium mb-6'>
-              🚀 Next-Generation Learning Platform
-            </div>
             <h1 className='text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight'>
               Build Your{" "}
               <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>

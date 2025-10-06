@@ -5,12 +5,15 @@ import type { BaseEntity } from "@/shared/types/global";
  */
 export interface BrandingSetting extends BaseEntity {
   readonly logoUrl?: string;
+  readonly logoText?: string;
+  readonly logoType: "upload" | "text";
   readonly primaryColor: string;
   readonly secondaryColor: string;
   readonly siteName: string;
   readonly siteDescription: string;
   readonly fontFamily: string;
   readonly faviconUrl?: string;
+  readonly heroBackgroundUrl?: string;
   readonly isActive: boolean;
   readonly createdBy?: string;
 }
@@ -20,12 +23,15 @@ export interface BrandingSetting extends BaseEntity {
  */
 export interface CreateBrandingData {
   readonly logoUrl?: string;
+  readonly logoText?: string;
+  readonly logoType: "upload" | "text";
   readonly primaryColor: string;
   readonly secondaryColor: string;
   readonly siteName: string;
   readonly siteDescription: string;
   readonly fontFamily: string;
   readonly faviconUrl?: string;
+  readonly heroBackgroundUrl?: string;
   readonly createdBy: string;
 }
 
@@ -34,12 +40,15 @@ export interface CreateBrandingData {
  */
 export interface UpdateBrandingData {
   readonly logoUrl?: string;
+  readonly logoText?: string;
+  readonly logoType?: "upload" | "text";
   readonly primaryColor?: string;
   readonly secondaryColor?: string;
   readonly siteName?: string;
   readonly siteDescription?: string;
   readonly fontFamily?: string;
   readonly faviconUrl?: string;
+  readonly heroBackgroundUrl?: string;
 }
 
 /**
@@ -58,6 +67,7 @@ export interface BrandingTheme {
   readonly assets: {
     logo?: string;
     favicon?: string;
+    heroBackground?: string;
   };
   readonly identity: {
     siteName: string;
