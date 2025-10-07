@@ -1,25 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Upload API called");
+    
     const session = await getServerSession(authOptions);
+    console.log("Session:", session?.user?.email);
+    
     if (!session?.user) {
+      console.log("No session found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is admin for logo uploads
     const user = session.user as { role: string; id: string };
+    console.log("User role:", user.role);
 
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
     const type: string = (data.get("type") as string) || "general";
+    
+    console.log("File:", file?.name, "Type:", type);
 
     if (!file) {
+      console.log("No file in request");
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
@@ -75,46 +81,21 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename based on type
-    const timestamp = Date.now();
-    const fileExtension = file.name.split(".").pop();
-    const filename = `${type}-${user.id}-${timestamp}.${fileExtension}`;
+    // For Vercel deployment, we'll store images as base64 data URLs
+    // This is a simple solution for MVP - in production, use cloud storage
+    const base64 = buffer.toString('base64');
+    const mimeType = file.type;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
-    // Determine upload directory based on type
-    let uploadSubDir = "general";
-    switch (type) {
-      case "logo":
-      case "hero-background":
-        uploadSubDir = "branding";
-        break;
-      case "course":
-        uploadSubDir = "courses";
-        break;
-      case "avatar":
-        uploadSubDir = "avatars";
-        break;
-      default:
-        uploadSubDir = "general";
-    }
+    console.log("Created data URL for file:", file.name);
 
-    const uploadDir = join(process.cwd(), "public", "uploads", uploadSubDir);
-
-    // Create directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    const filePath = join(uploadDir, filename);
-    await writeFile(filePath, buffer);
-
-    // Return the public URL
-    const fileUrl = `/uploads/${uploadSubDir}/${filename}`;
-
+    // Return the data URL instead of file path
     return NextResponse.json({
       success: true,
-      url: fileUrl,
-      filename: filename,
+      url: dataUrl,
+      filename: file.name,
       type: type,
+      message: "File uploaded successfully as base64 data URL"
     });
   } catch (error) {
     console.error("Error uploading file:", error);
