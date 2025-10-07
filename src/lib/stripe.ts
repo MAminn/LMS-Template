@@ -1,21 +1,22 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
-}
+// Make Stripe optional for deployment without Stripe credentials
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-09-30.clover",
-  typescript: true,
-});
+export const stripe = stripeSecretKey 
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: "2025-09-30.clover",
+      typescript: true,
+    })
+  : null;
 
 export const getStripePublicKey = () => {
-  if (!process.env.STRIPE_PUBLIC_KEY) {
-    throw new Error(
-      "STRIPE_PUBLIC_KEY is not defined in environment variables"
-    );
+  const publicKey = process.env.STRIPE_PUBLIC_KEY;
+  if (!publicKey) {
+    console.warn("STRIPE_PUBLIC_KEY is not defined - Stripe features disabled");
+    return null;
   }
-  return process.env.STRIPE_PUBLIC_KEY;
+  return publicKey;
 };
 
 /**
@@ -34,6 +35,10 @@ export async function createCheckoutSession({
   userId: string;
   userEmail: string;
 }) {
+  if (!stripe) {
+    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+  }
+  
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -68,6 +73,9 @@ export async function createCheckoutSession({
  * Retrieve a checkout session
  */
 export async function getCheckoutSession(sessionId: string) {
+  if (!stripe) {
+    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+  }
   return await stripe.checkout.sessions.retrieve(sessionId);
 }
 
@@ -83,6 +91,10 @@ export async function createSubscription({
   userEmail: string;
   priceId: string;
 }) {
+  if (!stripe) {
+    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+  }
+  
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [

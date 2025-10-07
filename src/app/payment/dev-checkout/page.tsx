@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CreditCard, Lock, CheckCircle } from "lucide-react";
 
-export default function DevCheckoutPage() {
+function DevCheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -159,5 +159,13 @@ export default function DevCheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DevCheckoutPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <DevCheckoutContent />
+    </Suspense>
   );
 }
