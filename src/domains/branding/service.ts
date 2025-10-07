@@ -225,11 +225,19 @@ export class BrandingService {
       );
     }
 
-    if (data.logoUrl && !this.isValidUrl(data.logoUrl)) {
+    if (
+      data.logoUrl &&
+      data.logoUrl.trim() !== "" &&
+      !this.isValidUrl(data.logoUrl)
+    ) {
       throw new ValidationError("Invalid logo URL format");
     }
 
-    if (data.faviconUrl && !this.isValidUrl(data.faviconUrl)) {
+    if (
+      data.faviconUrl &&
+      data.faviconUrl.trim() !== "" &&
+      !this.isValidUrl(data.faviconUrl)
+    ) {
       throw new ValidationError("Invalid favicon URL format");
     }
   }
@@ -242,10 +250,15 @@ export class BrandingService {
   }
 
   /**
-   * Check if URL is valid
+   * Check if URL is valid (supports both full URLs and relative paths)
    */
   private isValidUrl(url: string): boolean {
     try {
+      // Allow relative paths (starting with /)
+      if (url.startsWith("/")) {
+        return true;
+      }
+      // Validate full URLs
       new URL(url);
       return true;
     } catch {

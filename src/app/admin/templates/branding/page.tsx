@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Save, Upload, Eye, Palette, Type, Layout } from "lucide-react";
+import { useBranding } from "@/hooks/useBranding";
 
 interface BrandingSettings {
   logoUrl?: string;
   logoText?: string;
-  logoType?: "image" | "text";
+  logoType?: "upload" | "text";
   primaryColor: string;
   secondaryColor?: string;
   siteName?: string;
@@ -16,9 +18,8 @@ interface BrandingSettings {
   heroBackgroundUrl?: string;
 }
 
-import Image from "next/image";
-
 export default function BrandingPage() {
+  const { refreshBranding } = useBranding();
   const [settings, setSettings] = useState<BrandingSettings>({
     logoType: "text",
     logoText: "The Academy",
@@ -65,6 +66,8 @@ export default function BrandingPage() {
       if (response.ok) {
         // Show success message
         alert("Branding settings saved successfully!");
+        // Refresh branding context to update the logo display
+        await refreshBranding();
       } else {
         alert("Error saving settings");
       }
@@ -95,7 +98,7 @@ export default function BrandingPage() {
       if (response.ok) {
         const data = await response.json();
         handleInputChange("logoUrl", data.url);
-        handleInputChange("logoType", "image");
+        handleInputChange("logoType", "upload");
       } else {
         alert("Error uploading logo");
       }
@@ -130,17 +133,6 @@ export default function BrandingPage() {
       alert("Error uploading hero background");
     } finally {
       setIsUploading(false);
-    }
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith("image/")) {
-        handleLogoUpload(file);
-      } else {
-        alert("Please select an image file");
-      }
     }
   };
 
@@ -205,8 +197,75 @@ export default function BrandingPage() {
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Site Name
+                  Logo
                 </label>
+
+                {/* Logo Display Area */}
+                <div className='mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center'>
+                  {settings.logoUrl ? (
+                    <div className='space-y-2'>
+                      <Image
+                        src={settings.logoUrl}
+                        alt='Logo'
+                        width={64}
+                        height={64}
+                        className='w-16 h-16 object-cover mx-auto rounded-lg'
+                      />
+                      <p className='text-sm text-gray-600'>Current Logo</p>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          handleInputChange("logoUrl", "");
+                          handleInputChange("logoType", "text");
+                        }}
+                        className='text-red-600 hover:text-red-700 text-sm font-medium'>
+                        Remove Logo
+                      </button>
+                    </div>
+                  ) : (
+                    <div className='space-y-2'>
+                      <div className='w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mx-auto'>
+                        <span className='text-white font-bold text-lg'>
+                          {(settings.siteName || "")
+                            .split(" ")
+                            .map((word) => word[0])
+                            .join("")}
+                        </span>
+                      </div>
+                      <p className='text-sm text-gray-600'>
+                        Text Logo (Site Name Initials)
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Button */}
+                <div className='flex space-x-2 mb-4'>
+                  <input
+                    type='file'
+                    accept='image/*'
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleLogoUpload(file);
+                      }
+                    }}
+                    className='hidden'
+                    id='logo-upload'
+                  />
+                  <label
+                    htmlFor='logo-upload'
+                    className={`px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer flex items-center space-x-2 ${
+                      isUploading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}>
+                    <Upload className='w-4 h-4' />
+                    <span>
+                      {isUploading ? "Uploading..." : "Upload Logo Image"}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Site Name Input */}
                 <input
                   type='text'
                   value={settings.siteName || ""}
@@ -214,8 +273,12 @@ export default function BrandingPage() {
                     handleInputChange("siteName", e.target.value)
                   }
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='The Academy'
+                  placeholder='Site Name (e.g., The Academy)'
                 />
+                <p className='text-xs text-gray-500 mt-1'>
+                  This text will be used as your site name and as fallback text
+                  logo when no image is uploaded.
+                </p>
               </div>
 
               <div>
@@ -231,115 +294,6 @@ export default function BrandingPage() {
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                   placeholder='Learn anything, anywhere, anytime'
                 />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Logo
-                </label>
-
-                {/* Logo Type Toggle */}
-                <div className='flex space-x-4 mb-4'>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      name='logoType'
-                      value='text'
-                      checked={settings.logoType === "text"}
-                      onChange={(e) =>
-                        handleInputChange("logoType", e.target.value)
-                      }
-                      className='mr-2'
-                    />
-                    Text Logo
-                  </label>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      name='logoType'
-                      value='image'
-                      checked={settings.logoType === "image"}
-                      onChange={(e) =>
-                        handleInputChange("logoType", e.target.value)
-                      }
-                      className='mr-2'
-                    />
-                    Image Logo
-                  </label>
-                </div>
-
-                {/* Text Logo Input */}
-                {settings.logoType === "text" && (
-                  <div>
-                    <label className='block text-sm font-medium text-gray-600 mb-2'>
-                      Logo Text
-                    </label>
-                    <input
-                      type='text'
-                      value={settings.logoText || ""}
-                      onChange={(e) =>
-                        handleInputChange("logoText", e.target.value)
-                      }
-                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      placeholder='Your Brand Name'
-                    />
-                  </div>
-                )}
-
-                {/* Image Logo Upload */}
-                {settings.logoType === "image" && (
-                  <div>
-                    <label className='block text-sm font-medium text-gray-600 mb-2'>
-                      Logo Image
-                    </label>
-                    <div className='space-y-3'>
-                      <div className='flex space-x-2'>
-                        <input
-                          type='text'
-                          value={settings.logoUrl || ""}
-                          onChange={(e) =>
-                            handleInputChange("logoUrl", e.target.value)
-                          }
-                          className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                          placeholder='https://example.com/logo.png'
-                        />
-                        <input
-                          type='file'
-                          accept='image/*'
-                          onChange={handleFileSelect}
-                          className='hidden'
-                          id='logo-upload'
-                        />
-                        <label
-                          htmlFor='logo-upload'
-                          className='px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center cursor-pointer disabled:opacity-50'>
-                          {isUploading ? (
-                            <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
-                          ) : (
-                            <Upload size={16} />
-                          )}
-                        </label>
-                      </div>
-
-                      {/* Logo Preview */}
-                      {settings.logoUrl && (
-                        <div className='mt-2'>
-                          <p className='text-sm text-gray-600 mb-2'>Preview:</p>
-                          <div className='border border-gray-200 rounded-lg p-4 bg-gray-50 inline-block'>
-                            <Image
-                              src={settings.logoUrl}
-                              alt='Logo Preview'
-                              width={100}
-                              height={50}
-                              className='object-contain'
-                              style={{ maxHeight: "50px" }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -546,23 +500,26 @@ export default function BrandingPage() {
                 className='p-4 text-white'
                 style={{ backgroundColor: settings.primaryColor }}>
                 <div className='flex items-center space-x-2'>
-                  {settings.logoType === "image" && settings.logoUrl ? (
+                  {settings.logoUrl ? (
                     <Image
                       src={settings.logoUrl}
                       alt='Logo'
-                      width={32}
-                      height={32}
-                      className='object-contain'
+                      width={80}
+                      height={24}
+                      className='h-6 object-contain'
                     />
-                  ) : settings.logoType === "text" && settings.logoText ? (
-                    <span className='font-bold text-lg'>
-                      {settings.logoText}
-                    </span>
                   ) : (
-                    <div className='w-8 h-8 bg-white/20 rounded'></div>
-                  )}
-                  {settings.logoType === "image" && (
-                    <h1 className='font-bold'>{settings.siteName}</h1>
+                    <>
+                      <div className='w-8 h-8 bg-white/20 rounded flex items-center justify-center'>
+                        <span className='text-white font-bold text-sm'>
+                          {(settings.siteName || "")
+                            .split(" ")
+                            .map((word) => word[0])
+                            .join("")}
+                        </span>
+                      </div>
+                      <h1 className='font-bold'>{settings.siteName}</h1>
+                    </>
                   )}
                 </div>
               </div>

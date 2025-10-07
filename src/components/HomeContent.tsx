@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   useBranding,
   useBrandingClasses,
@@ -21,10 +22,6 @@ export function HomeContent({ content, features }: HomeContentProps) {
   const brandingStyles = useBrandingStyles();
   const brandingClasses = useBrandingClasses();
 
-  // Debug log to check if heroBackground is available
-  console.log("Theme assets:", theme.assets);
-  console.log("Hero background URL:", theme.assets.heroBackground);
-
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'>
       {/* Navigation Header */}
@@ -32,19 +29,31 @@ export function HomeContent({ content, features }: HomeContentProps) {
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center h-16'>
             <div className='flex items-center space-x-3'>
-              <div
-                className='w-10 h-10 rounded-lg flex items-center justify-center'
-                style={brandingStyles.gradient}>
-                <span className='text-white font-bold text-lg'>
-                  {theme.identity.siteName
-                    .split(" ")
-                    .map((word) => word[0])
-                    .join("")}
-                </span>
-              </div>
-              <span className='text-xl font-bold text-gray-900'>
-                {theme.identity.siteName}
-              </span>
+              {theme.assets.logo ? (
+                <Image
+                  src={theme.assets.logo}
+                  alt={theme.identity.siteName}
+                  width={120}
+                  height={40}
+                  className='h-10 object-contain'
+                />
+              ) : (
+                <>
+                  <div
+                    className='w-10 h-10 rounded-lg flex items-center justify-center'
+                    style={brandingStyles.gradient}>
+                    <span className='text-white font-bold text-lg'>
+                      {theme.identity.siteName
+                        .split(" ")
+                        .map((word) => word[0])
+                        .join("")}
+                    </span>
+                  </div>
+                  <span className='text-xl font-bold text-gray-900'>
+                    {theme.identity.siteName}
+                  </span>
+                </>
+              )}
             </div>
             <div className='flex items-center space-x-4'>
               <Link
@@ -296,19 +305,31 @@ export function HomeContent({ content, features }: HomeContentProps) {
           <div className='grid md:grid-cols-4 gap-8'>
             <div className='md:col-span-2'>
               <div className='flex items-center space-x-3 mb-6'>
-                <div
-                  className='w-10 h-10 rounded-lg flex items-center justify-center'
-                  style={brandingStyles.gradient}>
-                  <span className='text-white font-bold text-lg'>
-                    {theme.identity.siteName
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")}
-                  </span>
-                </div>
-                <span className='text-xl font-bold'>
-                  {theme.identity.siteName}
-                </span>
+                {theme.assets.logo ? (
+                  <Image
+                    src={theme.assets.logo}
+                    alt={theme.identity.siteName}
+                    width={120}
+                    height={40}
+                    className='h-10 object-contain'
+                  />
+                ) : (
+                  <>
+                    <div
+                      className='w-10 h-10 rounded-lg flex items-center justify-center'
+                      style={brandingStyles.gradient}>
+                      <span className='text-white font-bold text-lg'>
+                        {theme.identity.siteName
+                          .split(" ")
+                          .map((word) => word[0])
+                          .join("")}
+                      </span>
+                    </div>
+                    <span className='text-xl font-bold'>
+                      {theme.identity.siteName}
+                    </span>
+                  </>
+                )}
               </div>
               <p className='text-gray-400 mb-6 max-w-md'>
                 {content.footerDescription}
