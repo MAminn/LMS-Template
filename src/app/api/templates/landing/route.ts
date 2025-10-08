@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 // GET /api/templates/landing - Get current landing page content
 export async function GET() {
@@ -143,6 +144,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Revalidate the homepage to show updated content immediately
+    revalidatePath("/");
+    
     return NextResponse.json({
       success: true,
       data: newContent,
