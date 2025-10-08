@@ -5,10 +5,10 @@ import { authOptions } from "@/lib/auth";
 export async function POST(request: NextRequest) {
   try {
     console.log("Upload API called");
-    
+
     const session = await getServerSession(authOptions);
     console.log("Session:", session?.user?.email);
-    
+
     if (!session?.user) {
       console.log("No session found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
     const type: string = (data.get("type") as string) || "general";
-    
+
     console.log("File:", file?.name, "Type:", type);
 
     if (!file) {
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // For Vercel deployment, we'll store images as base64 data URLs
     // This is a simple solution for MVP - in production, use cloud storage
-    const base64 = buffer.toString('base64');
+    const base64 = buffer.toString("base64");
     const mimeType = file.type;
     const dataUrl = `data:${mimeType};base64,${base64}`;
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       url: dataUrl,
       filename: file.name,
       type: type,
-      message: "File uploaded successfully as base64 data URL"
+      message: "File uploaded successfully as base64 data URL",
     });
   } catch (error) {
     console.error("Error uploading file:", error);

@@ -220,7 +220,12 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Loader2 className="animate-spin" /></div>}>
+    <Suspense
+      fallback={
+        <div className='flex justify-center items-center min-h-screen'>
+          <Loader2 className='animate-spin' />
+        </div>
+      }>
       <PaymentSuccessContent />
     </Suspense>
   );

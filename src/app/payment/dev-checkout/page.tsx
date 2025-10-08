@@ -164,7 +164,12 @@ function DevCheckoutContent() {
 
 export default function DevCheckoutPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className='flex justify-center items-center min-h-screen'>
+          Loading...
+        </div>
+      }>
       <DevCheckoutContent />
     </Suspense>
   );

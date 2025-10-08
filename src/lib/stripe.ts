@@ -3,7 +3,7 @@ import Stripe from "stripe";
 // Make Stripe optional for deployment without Stripe credentials
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-export const stripe = stripeSecretKey 
+export const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
       apiVersion: "2025-09-30.clover",
       typescript: true,
@@ -36,9 +36,11 @@ export async function createCheckoutSession({
   userEmail: string;
 }) {
   if (!stripe) {
-    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+    throw new Error(
+      "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable."
+    );
   }
-  
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -74,7 +76,9 @@ export async function createCheckoutSession({
  */
 export async function getCheckoutSession(sessionId: string) {
   if (!stripe) {
-    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+    throw new Error(
+      "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable."
+    );
   }
   return await stripe.checkout.sessions.retrieve(sessionId);
 }
@@ -92,9 +96,11 @@ export async function createSubscription({
   priceId: string;
 }) {
   if (!stripe) {
-    throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.");
+    throw new Error(
+      "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable."
+    );
   }
-  
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [

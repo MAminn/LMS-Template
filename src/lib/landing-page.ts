@@ -28,12 +28,12 @@ export interface LandingPageFeature {
 export async function getLandingPageContent() {
   try {
     console.log("Fetching landing page content...");
-    
+
     const content = await prisma.landingPageContent.findFirst({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
     });
-    
+
     console.log("Database query result:", !!content);
     if (content) {
       console.log("Found content:", content.heroTitle);
@@ -45,7 +45,7 @@ export async function getLandingPageContent() {
       where: { isActive: true },
       orderBy: { order: "asc" },
     });
-    
+
     console.log("Found features count:", dbFeatures.length);
 
     // Transform database features to match interface
