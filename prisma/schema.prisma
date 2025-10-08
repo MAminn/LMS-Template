@@ -26,6 +26,7 @@ model User {
   sessions           Session[]
   subscriptions      Subscription[]
   transactions       Transaction[]
+  quizAttempts       QuizAttempt[]
 
   @@map("users")
 }
@@ -109,6 +110,7 @@ model Lesson {
   moduleId    String
   createdAt   DateTime         @default(now())
   progress    LessonProgress[]
+  quizzes     Quiz[]
   module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@map("lessons")
@@ -320,4 +322,82 @@ enum TransactionStatus {
   COMPLETED
   FAILED
   CANCELED
+}
+
+model Quiz {
+  id           String         @id @default(cuid())
+  title        String
+  description  String?
+  lessonId     String
+  timeLimit    Int?           // in minutes
+  passingScore Int            @default(70) // percentage
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  lesson       Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions    QuizQuestion[]
+  attempts     QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id       String             @id @default(cuid())
+  question String
+  type     QuizQuestionType   @default(MULTIPLE_CHOICE)
+  points   Int                @default(1)
+  order    Int
+  quizId   String
+  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options  QuizQuestionOption[]
+  answers  QuizAnswer[]
+
+  @@map("quiz_questions")
+}
+
+model QuizQuestionOption {
+  id         String       @id @default(cuid())
+  text       String
+  isCorrect  Boolean      @default(false)
+  order      Int
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_question_options")
+}
+
+model QuizAttempt {
+  id          String       @id @default(cuid())
+  studentId   String
+  quizId      String
+  score       Int          // percentage
+  timeSpent   Int          // in seconds
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  passed      Boolean      @default(false)
+  student     User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers     QuizAnswer[]
+
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id            String             @id @default(cuid())
+  attemptId     String
+  questionId    String
+  selectedText  String?            // for text answers
+  isCorrect     Boolean            @default(false)
+  points        Int                @default(0)
+  attempt       QuizAttempt        @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question      QuizQuestion       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_answers")
+}
+
+enum QuizQuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
 }
