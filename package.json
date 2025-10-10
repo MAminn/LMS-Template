@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "overrides": {
-    "@auth/core": "0.34.2"
+    "@auth/core": "0.34.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "install:legacy": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
