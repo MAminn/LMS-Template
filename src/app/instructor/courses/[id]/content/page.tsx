@@ -71,7 +71,14 @@ export default function CourseContentPage({ params }: CourseContentPageProps) {
     description: "",
     content: "",
     videoUrl: "",
+    videoFileUrl: "",
+    thumbnailUrl: "",
     duration: "",
+    isPreview: false,
+    isFree: false,
+    prerequisites: [] as string[],
+    scheduledAt: "",
+    interactiveData: {},
   });
 
   const router = useRouter();
@@ -165,7 +172,14 @@ export default function CourseContentPage({ params }: CourseContentPageProps) {
           description: "",
           content: "",
           videoUrl: "",
+          videoFileUrl: "",
+          thumbnailUrl: "",
           duration: "",
+          isPreview: false,
+          isFree: false,
+          prerequisites: [],
+          scheduledAt: "",
+          interactiveData: {},
         });
         setShowLessonForm(null);
         fetchModules();
@@ -357,47 +371,51 @@ export default function CourseContentPage({ params }: CourseContentPageProps) {
                     <h4 className='text-md font-semibold text-gray-900 mb-4'>
                       Create New Lesson
                     </h4>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                      <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>
-                          Lesson Title *
-                        </label>
-                        <input
-                          type='text'
-                          value={newLessonData.title}
-                          onChange={(e) =>
-                            setNewLessonData({
-                              ...newLessonData,
-                              title: e.target.value,
-                            })
-                          }
-                          className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                          placeholder='Enter lesson title'
-                        />
+                    
+                    {/* Basic Information */}
+                    <div className='space-y-6'>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 mb-1'>
+                            Lesson Title *
+                          </label>
+                          <input
+                            type='text'
+                            value={newLessonData.title}
+                            onChange={(e) =>
+                              setNewLessonData({
+                                ...newLessonData,
+                                title: e.target.value,
+                              })
+                            }
+                            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                            placeholder='Enter lesson title'
+                          />
+                        </div>
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 mb-1'>
+                            Duration (minutes)
+                          </label>
+                          <input
+                            type='number'
+                            value={newLessonData.duration}
+                            onChange={(e) =>
+                              setNewLessonData({
+                                ...newLessonData,
+                                duration: e.target.value,
+                              })
+                            }
+                            className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                            placeholder='e.g., 15'
+                          />
+                        </div>
                       </div>
+
                       <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>
-                          Duration (minutes)
-                        </label>
-                        <input
-                          type='number'
-                          value={newLessonData.duration}
-                          onChange={(e) =>
-                            setNewLessonData({
-                              ...newLessonData,
-                              duration: e.target.value,
-                            })
-                          }
-                          className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                          placeholder='e.g., 15'
-                        />
-                      </div>
-                      <div className='md:col-span-2'>
                         <label className='block text-sm font-medium text-gray-700 mb-1'>
                           Description
                         </label>
-                        <input
-                          type='text'
+                        <textarea
                           value={newLessonData.description}
                           onChange={(e) =>
                             setNewLessonData({
@@ -405,29 +423,172 @@ export default function CourseContentPage({ params }: CourseContentPageProps) {
                               description: e.target.value,
                             })
                           }
+                          rows={3}
                           className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                           placeholder='Brief lesson description'
                         />
                       </div>
-                      <div className='md:col-span-2'>
+
+                      {/* Video Options */}
+                      <div className='space-y-4'>
+                        <h5 className='text-sm font-medium text-gray-900'>Video Content</h5>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div>
+                            <label className='block text-sm font-medium text-gray-700 mb-1'>
+                              Video URL (YouTube/Vimeo)
+                            </label>
+                            <input
+                              type='url'
+                              value={newLessonData.videoUrl}
+                              onChange={(e) =>
+                                setNewLessonData({
+                                  ...newLessonData,
+                                  videoUrl: e.target.value,
+                                })
+                              }
+                              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                              placeholder='https://youtube.com/watch?v=...'
+                            />
+                          </div>
+                          <div>
+                            <label className='block text-sm font-medium text-gray-700 mb-1'>
+                              Custom Thumbnail URL
+                            </label>
+                            <input
+                              type='url'
+                              value={newLessonData.thumbnailUrl}
+                              onChange={(e) =>
+                                setNewLessonData({
+                                  ...newLessonData,
+                                  thumbnailUrl: e.target.value,
+                                })
+                              }
+                              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                              placeholder='https://example.com/thumbnail.jpg'
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content Scheduling */}
+                      <div className='space-y-4'>
+                        <h5 className='text-sm font-medium text-gray-900'>Content Scheduling</h5>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div>
+                            <label className='block text-sm font-medium text-gray-700 mb-1'>
+                              Scheduled Release Date
+                            </label>
+                            <input
+                              type='datetime-local'
+                              value={newLessonData.scheduledAt}
+                              onChange={(e) =>
+                                setNewLessonData({
+                                  ...newLessonData,
+                                  scheduledAt: e.target.value,
+                                })
+                              }
+                              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                            />
+                            <p className='text-xs text-gray-500 mt-1'>
+                              Leave empty for immediate release
+                            </p>
+                          </div>
+                          <div>
+                            <label className='block text-sm font-medium text-gray-700 mb-1'>
+                              Prerequisites
+                            </label>
+                            <select
+                              multiple
+                              value={newLessonData.prerequisites}
+                              onChange={(e) => {
+                                const values = Array.from(e.target.selectedOptions, option => option.value);
+                                setNewLessonData({
+                                  ...newLessonData,
+                                  prerequisites: values,
+                                });
+                              }}
+                              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                              size={3}
+                            >
+                              {modules.flatMap(mod => 
+                                mod.lessons.map(lesson => (
+                                  <option key={lesson.id} value={lesson.id}>
+                                    {mod.title}: {lesson.title}
+                                  </option>
+                                ))
+                              )}
+                            </select>
+                            <p className='text-xs text-gray-500 mt-1'>
+                              Hold Ctrl/Cmd to select multiple lessons
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Access Settings */}
+                      <div className='space-y-4'>
+                        <h5 className='text-sm font-medium text-gray-900'>Access Settings</h5>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div className='space-y-3'>
+                            <div className='flex items-center'>
+                              <input
+                                type='checkbox'
+                                id={`preview-${module.id}`}
+                                checked={newLessonData.isPreview}
+                                onChange={(e) =>
+                                  setNewLessonData({
+                                    ...newLessonData,
+                                    isPreview: e.target.checked,
+                                  })
+                                }
+                                className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                              />
+                              <label htmlFor={`preview-${module.id}`} className='ml-2 text-sm text-gray-700'>
+                                Available as preview
+                              </label>
+                            </div>
+                            <div className='flex items-center'>
+                              <input
+                                type='checkbox'
+                                id={`free-${module.id}`}
+                                checked={newLessonData.isFree}
+                                onChange={(e) =>
+                                  setNewLessonData({
+                                    ...newLessonData,
+                                    isFree: e.target.checked,
+                                  })
+                                }
+                                className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                              />
+                              <label htmlFor={`free-${module.id}`} className='ml-2 text-sm text-gray-700'>
+                                Free for all users
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Lesson Content */}
+                      <div>
                         <label className='block text-sm font-medium text-gray-700 mb-1'>
-                          Video URL
+                          Lesson Content
                         </label>
-                        <input
-                          type='url'
-                          value={newLessonData.videoUrl}
+                        <textarea
+                          value={newLessonData.content}
                           onChange={(e) =>
                             setNewLessonData({
                               ...newLessonData,
-                              videoUrl: e.target.value,
+                              content: e.target.value,
                             })
                           }
+                          rows={6}
                           className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                          placeholder='https://youtube.com/watch?v=...'
+                          placeholder='Enter lesson content, notes, or transcript...'
                         />
                       </div>
                     </div>
-                    <div className='flex space-x-2 mt-4'>
+
+                    <div className='flex space-x-2 mt-6'>
                       <button
                         onClick={() => createLesson(module.id)}
                         className='bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors'>
@@ -441,7 +602,14 @@ export default function CourseContentPage({ params }: CourseContentPageProps) {
                             description: "",
                             content: "",
                             videoUrl: "",
+                            videoFileUrl: "",
+                            thumbnailUrl: "",
                             duration: "",
+                            isPreview: false,
+                            isFree: false,
+                            prerequisites: [],
+                            scheduledAt: "",
+                            interactiveData: {},
                           });
                         }}
                         className='bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors'>

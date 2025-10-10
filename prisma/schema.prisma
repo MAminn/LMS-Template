@@ -22,6 +22,7 @@ model User {
   banners            HomepageBanner[]
   landingPageContent LandingPageContent[]
   lessonProgress     LessonProgress[]
+  lessonAnalytics    LessonAnalytics[]
   payments           Payment[]
   sessions           Session[]
   subscriptions      Subscription[]
@@ -100,31 +101,47 @@ model Module {
 }
 
 model Lesson {
-  id          String           @id @default(cuid())
-  title       String
-  description String?
-  content     String?
-  videoUrl    String?
-  duration    Int?
-  order       Int
-  moduleId    String
-  createdAt   DateTime         @default(now())
-  progress    LessonProgress[]
-  quizzes     Quiz[]
-  module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  id              String              @id @default(cuid())
+  title           String
+  description     String?
+  content         String?
+  videoUrl        String?
+  videoFileUrl    String?             // Direct video file upload
+  thumbnailUrl    String?             // Custom thumbnail
+  duration        Int?
+  order           Int
+  moduleId        String
+  isPreview       Boolean             @default(false)
+  isFree          Boolean             @default(false)
+  prerequisites   String[]            // Array of lesson IDs
+  scheduledAt     DateTime?           // For drip-feed content
+  isPublished     Boolean             @default(true)
+  interactiveData Json?               // For interactive elements
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  progress        LessonProgress[]
+  quizzes         Quiz[]
+  attachments     LessonAttachment[]
+  analytics       LessonAnalytics[]
+  module          Module              @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@map("lessons")
 }
 
 model LessonProgress {
-  id          String    @id @default(cuid())
-  studentId   String
-  lessonId    String
-  completed   Boolean   @default(false)
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  studentId     String
+  lessonId      String
+  completed     Boolean   @default(false)
+  completedAt   DateTime?
+  timeSpent     Int?      // seconds spent on lesson
+  lastPosition  Int?      // video position for resume
+  watchedDuration Int?    // actual watched time in seconds
+  dropOffPoint  Int?      // where student stopped watching (seconds)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  student       User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson        Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, lessonId])
   @@map("lesson_progress")
@@ -141,6 +158,45 @@ model Enrollment {
 
   @@unique([studentId, courseId])
   @@map("enrollments")
+}
+
+model LessonAttachment {
+  id           String   @id @default(cuid())
+  lessonId     String
+  title        String
+  description  String?
+  fileUrl      String
+  fileName     String
+  fileSize     Int      // in bytes
+  fileType     String   // MIME type
+  downloadCount Int     @default(0)
+  isRequired   Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_attachments")
+}
+
+model LessonAnalytics {
+  id              String   @id @default(cuid())
+  lessonId        String
+  studentId       String
+  sessionStart    DateTime @default(now())
+  sessionEnd      DateTime?
+  totalWatchTime  Int?     // seconds
+  interactions    Json?    // click events, pauses, etc.
+  deviceType      String?  // mobile, desktop, tablet
+  browserType     String?
+  ipAddress       String?
+  engagementScore Float?   // calculated engagement score
+  createdAt       DateTime @default(now())
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, studentId, sessionStart])
+  @@map("lesson_analytics")
 }
 
 model BrandingSetting {
