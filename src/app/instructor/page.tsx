@@ -1,6 +1,12 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { BookOpen, Users, DollarSign, TrendingUp } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  DollarSign,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import Link from "next/link";
 
 export default async function InstructorDashboard() {
@@ -75,7 +81,7 @@ export default async function InstructorDashboard() {
       </div>
 
       {/* Course Management */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
         <div className='bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-300'>
           <div className='p-6 border-b border-gray-200'>
             <div className='flex justify-between items-center'>
@@ -175,6 +181,69 @@ export default async function InstructorDashboard() {
                   <p className='text-xs text-gray-500'>2 days ago</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-300'>
+          <div className='p-6 border-b border-gray-200'>
+            <div className='flex justify-between items-center'>
+              <h2 className='text-lg font-medium text-gray-900'>Analytics</h2>
+              <Link
+                href='/analytics'
+                className='bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors duration-200 transform hover:scale-105 flex items-center space-x-2'>
+                <BarChart3 className='h-4 w-4' />
+                <span>View Analytics</span>
+              </Link>
+            </div>
+          </div>
+          <div className='p-6'>
+            <div className='space-y-4'>
+              <div className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-300 transition-colors duration-200 hover:bg-green-50'>
+                <div>
+                  <h3 className='font-medium text-gray-900'>
+                    Course Performance
+                  </h3>
+                  <p className='text-sm text-gray-600'>
+                    Average completion: 87%
+                  </p>
+                </div>
+                <div className='text-right'>
+                  <p className='text-lg font-semibold text-green-600'>↗ 12%</p>
+                  <p className='text-xs text-gray-500'>vs last month</p>
+                </div>
+              </div>
+              <div className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors duration-200 hover:bg-blue-50'>
+                <div>
+                  <h3 className='font-medium text-gray-900'>
+                    Student Engagement
+                  </h3>
+                  <p className='text-sm text-gray-600'>
+                    Daily active learners: 42
+                  </p>
+                </div>
+                <div className='text-right'>
+                  <p className='text-lg font-semibold text-blue-600'>↗ 8%</p>
+                  <p className='text-xs text-gray-500'>vs last week</p>
+                </div>
+              </div>
+              <div className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors duration-200 hover:bg-purple-50'>
+                <div>
+                  <h3 className='font-medium text-gray-900'>Quiz Scores</h3>
+                  <p className='text-sm text-gray-600'>Average score: 84%</p>
+                </div>
+                <div className='text-right'>
+                  <p className='text-lg font-semibold text-purple-600'>↗ 5%</p>
+                  <p className='text-xs text-gray-500'>vs last month</p>
+                </div>
+              </div>
+            </div>
+            <div className='mt-4 text-center'>
+              <Link
+                href='/analytics'
+                className='text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200'>
+                View Detailed Analytics →
+              </Link>
             </div>
           </div>
         </div>

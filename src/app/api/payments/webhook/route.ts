@@ -6,6 +6,14 @@ import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe not configured" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.text();
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
@@ -83,7 +91,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         status: "COMPLETED",
         stripePaymentId: session.payment_intent as string,
         metadata: {
-          ...payment.metadata,
+          ...((payment.metadata as Record<string, unknown>) || {}),
           sessionCompleted: true,
           completedAt: new Date().toISOString(),
         },

@@ -48,11 +48,12 @@ const menuItems = [
   {
     name: "Analytics",
     icon: BarChart3,
-    href: "/admin/analytics",
+    href: "/analytics",
     subItems: [
-      { name: "Overview", href: "/admin/analytics" },
-      { name: "Revenue", href: "/admin/analytics/revenue" },
-      { name: "Engagement", href: "/admin/analytics/engagement" },
+      { name: "Overview", href: "/analytics" },
+      { name: "Enrollment", href: "/analytics?tab=enrollment" },
+      { name: "Performance", href: "/analytics?tab=performance" },
+      { name: "Engagement", href: "/analytics?tab=engagement" },
     ],
   },
   {

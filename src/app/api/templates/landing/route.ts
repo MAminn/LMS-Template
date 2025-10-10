@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     // Revalidate the homepage to show updated content immediately
     revalidatePath("/");
-    
+
     return NextResponse.json({
       success: true,
       data: newContent,

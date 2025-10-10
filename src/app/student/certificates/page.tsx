@@ -11,6 +11,7 @@ import {
   User,
   BookOpen,
 } from "lucide-react";
+import { CertificateGenerator, generateCertificateId, type CertificateData } from "@/lib/certificate-generator";
 
 interface Certificate {
   courseId: string;
@@ -26,7 +27,7 @@ export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { data: session } = useSession();
+  useSession();
 
   useEffect(() => {
     fetchCertificates();
@@ -48,78 +49,17 @@ export default function CertificatesPage() {
   };
 
   const generateCertificate = (certificate: Certificate) => {
-    // Create a simple certificate layout
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    if (!ctx) return;
-
-    // Set canvas size
-    canvas.width = 800;
-    canvas.height = 600;
-
-    // Background
-    ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Border
-    ctx.strokeStyle = "#3b82f6";
-    ctx.lineWidth = 8;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-    // Inner border
-    ctx.strokeStyle = "#1e40af";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-
-    // Title
-    ctx.fillStyle = "#1e40af";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("Certificate of Completion", canvas.width / 2, 120);
-
-    // Subtitle
-    ctx.fillStyle = "#64748b";
-    ctx.font = "24px Arial";
-    ctx.fillText("This certifies that", canvas.width / 2, 180);
-
-    // Student name
-    ctx.fillStyle = "#1e293b";
-    ctx.font = "bold 36px Arial";
-    ctx.fillText(certificate.studentName, canvas.width / 2, 240);
-
-    // Course completion text
-    ctx.fillStyle = "#64748b";
-    ctx.font = "24px Arial";
-    ctx.fillText(
-      "has successfully completed the course",
-      canvas.width / 2,
-      300
-    );
-
-    // Course title
-    ctx.fillStyle = "#1e40af";
-    ctx.font = "bold 32px Arial";
-    ctx.fillText(certificate.courseTitle, canvas.width / 2, 360);
-
-    // Date and instructor
-    ctx.fillStyle = "#64748b";
-    ctx.font = "18px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText(`Completion Date: ${certificate.completionDate}`, 80, 480);
-    ctx.fillText(`Instructor: ${certificate.instructorName}`, 80, 510);
-
-    // Academy logo (text)
-    ctx.fillStyle = "#3b82f6";
-    ctx.font = "bold 24px Arial";
-    ctx.textAlign = "right";
-    ctx.fillText("The Academy", canvas.width - 80, 480);
-
-    // Download the certificate
-    const link = document.createElement("a");
-    link.download = `${certificate.courseTitle}_Certificate.png`;
-    link.href = canvas.toDataURL();
-    link.click();
+    const generator = new CertificateGenerator();
+    const certificateData: CertificateData = {
+      studentName: certificate.studentName,
+      courseTitle: certificate.courseTitle,
+      instructorName: certificate.instructorName,
+      completionDate: certificate.completionDate,
+      certificateId: generateCertificateId(),
+      organizationName: "The Academy"
+    };
+    
+    generator.downloadCertificate(certificateData);
   };
 
   if (loading) {

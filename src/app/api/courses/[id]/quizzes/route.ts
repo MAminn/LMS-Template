@@ -30,7 +30,7 @@ interface CreateQuizData {
 
 // GET /api/courses/[id]/quizzes - Get all quizzes for a course
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<Params> }
 ) {
   try {
@@ -43,19 +43,19 @@ export async function GET(
     const courseId = resolvedParams.id;
 
     const quizzes = await prisma.quiz.findMany({
-      where: { 
+      where: {
         lesson: {
           module: {
-            courseId: courseId
-          }
-        }
+            courseId: courseId,
+          },
+        },
       },
       include: {
         questions: {
           include: {
-            options: true
+            options: true,
           },
-          orderBy: { order: 'asc' }
+          orderBy: { order: "asc" },
         },
         lesson: {
           select: {
@@ -63,13 +63,13 @@ export async function GET(
             title: true,
             module: {
               select: {
-                title: true
-              }
-            }
-          }
-        }
+                title: true,
+              },
+            },
+          },
+        },
       },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: "asc" },
     });
 
     return NextResponse.json({ success: true, data: quizzes });
@@ -89,7 +89,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'INSTRUCTOR') {
+    if (!session || session.user.role !== "INSTRUCTOR") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -101,12 +101,15 @@ export async function POST(
     const course = await prisma.course.findFirst({
       where: {
         id: courseId,
-        instructorId: session.user.id
-      }
+        instructorId: session.user.id,
+      },
     });
 
     if (!course) {
-      return NextResponse.json({ error: "Course not found or unauthorized" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Course not found or unauthorized" },
+        { status: 404 }
+      );
     }
 
     // Verify lesson belongs to this course
@@ -114,9 +117,9 @@ export async function POST(
       where: {
         id: data.lessonId,
         module: {
-          courseId: courseId
-        }
-      }
+          courseId: courseId,
+        },
+      },
     });
 
     if (!lesson) {
@@ -127,9 +130,9 @@ export async function POST(
     const quiz = await prisma.quiz.create({
       data: {
         title: data.title,
-        description: data.description,
+        description: data.description || null,
         lessonId: data.lessonId,
-        timeLimit: data.timeLimit,
+        timeLimit: data.timeLimit || null,
         passingScore: data.passingScore,
         questions: {
           create: data.questions.map((q: QuizQuestionData, index: number) => ({
@@ -138,23 +141,24 @@ export async function POST(
             points: q.points || 1,
             order: index + 1,
             options: {
-              create: q.options?.map((opt: QuizOptionData, optIndex: number) => ({
-                text: opt.text,
-                isCorrect: opt.isCorrect,
-                order: optIndex + 1
-              })) || []
-            }
-          }))
-        }
+              create:
+                q.options?.map((opt: QuizOptionData, optIndex: number) => ({
+                  text: opt.text,
+                  isCorrect: opt.isCorrect,
+                  order: optIndex + 1,
+                })) || [],
+            },
+          })),
+        },
       },
       include: {
         questions: {
           include: {
-            options: true
+            options: true,
           },
-          orderBy: { order: 'asc' }
-        }
-      }
+          orderBy: { order: "asc" },
+        },
+      },
     });
 
     return NextResponse.json({ success: true, data: quiz });
